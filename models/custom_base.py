@@ -3,8 +3,9 @@ from typing import Optional
 
 
 
-from sqlalchemy import func, TIMESTAMP, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import func, TIMESTAMP, Integer, Boolean
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
 
 from core import setup
@@ -17,6 +18,7 @@ class CustomBase(setup.Base):
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=func.now())
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now())
     deleted_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     
     """Base class for all models.

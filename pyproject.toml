@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "quantum-fastapi-base"
+version = "0.1.0"
+description = "base app for fastapi applications"
+authors = ["fansah <fansah@quantumgroupgh.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+sqlalchemy = "^2.0.36"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
