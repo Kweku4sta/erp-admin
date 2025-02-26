@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     API_TITLE: str = "Quantum Group API Documentation"
     APP_DESCRIPTION: str = "This is a base application for FastAPI"
     DATABASE_URL: str = "sqlite:///./test.db"
-    TESTING: bool = True
+    TESTING: bool = False
     X_SUBSCRIPTION_KEY: str=  "tester"
     AUTH_SERVICE_API_USER: str = "tester"
     AUTH_SERVICE_API_KEY: str = "tester"
@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     REDIS_PORT: Union[int, str] = 6379
     REDIS_DB: Union[int, str] = 0
     REDIS_PASSWORD: str = ""
+    POSTRES_DATABASE_URL: str = "postgresql://postgres:database@localhost/erp-portal"
+    S3_REGION : str = "S3_REGION"
+    AWS_ACCESS_KEY: str = "AWS_ACCESS_KEY"
+    AWS_SECRET_KEY: str = "AWS_SECRET_KEY"
 
     class Config:
         env_file = ".env"
+
+
+settings = Settings()

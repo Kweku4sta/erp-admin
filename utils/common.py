@@ -1,7 +1,9 @@
 from typing import Any
-
 import requests
 from requests import Response
+import base64
+
+from fastapi import UploadFile
 
 from errors.exception import InternalProcessingError
 from tools.log import Log
@@ -51,6 +53,26 @@ def send_request(method: str, url: str, data: dict[Any, Any]= None) -> requests.
         )
     except Exception as e:
         common_logger.error(f"{send_request.__name__} - {str(e.args[0])}")
+        raise InternalProcessingError(
+            msg={"message": "Internal Server Error"}, code=500
+        )
+    
+
+
+def nia_verification(ghana_card: UploadFile) -> dict:
+    """
+    Verify NIA
+    """
+    try:
+        image = ghana_card.file.read()
+        ghana_card = base64.b64encode(image).decode("utf-8")
+        data = {"image": ghana_card}
+        url = "https://nia-verification.com"
+        method = "POST"
+        response = send_request(method, url, data)
+        return response.json()
+    except Exception as e:
+        common_logger.error(f"{nia_verification.__name__} - {str(e.args[0])}")
         raise InternalProcessingError(
             msg={"message": "Internal Server Error"}, code=500
         )

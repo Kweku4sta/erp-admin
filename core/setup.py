@@ -25,7 +25,7 @@ class DatabaseSetup:
                 connect_args={"check_same_thread": False},
             )
         else:
-            self._engine = create_engine(settings.DATABASE_URL)
+            self._engine = create_engine(settings.POSTRES_DATABASE_URL)
         self._session_maker = sessionmaker(
             bind=self._engine, autocommit=False, autoflush=False
         )

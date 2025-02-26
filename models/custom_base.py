@@ -3,9 +3,9 @@ from typing import Optional
 
 
 
-from sqlalchemy import func, TIMESTAMP, Integer, Boolean
+from sqlalchemy import func, TIMESTAMP, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship, declared_attr
 
 
 from core import setup
@@ -19,8 +19,8 @@ class CustomBase(setup.Base):
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), default=func.now(), onupdate=func.now())
     deleted_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+   
 
-    
     """Base class for all models.
     Includes common columns and methods for all models.
     
@@ -62,3 +62,16 @@ class CustomBase(setup.Base):
     def perform_custom_logic(self) -> None:
         """Placeholder for custom logic expected in child classes."""
         raise NotImplementedError("This method should be implemented by subclasses.")
+
+
+class BaseWithCreator():
+    @declared_attr
+    def created_by_id(cls):
+        return mapped_column(Integer, ForeignKey("users.id"))
+    
+    @declared_attr
+    def created_by(cls):
+        return relationship("User", foreign_keys=[cls.created_by_id])
+
+    
+
