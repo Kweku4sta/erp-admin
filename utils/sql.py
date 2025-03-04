@@ -25,7 +25,7 @@ def add_object_to_database(item: Any) -> dict:
         database_session.refresh(item)
         return item
     
-def get_all_objects_from_database(model: Any, paginate_result: bool, per_page: int = None, size: int = None) -> Any:
+def get_all_objects_from_database(model: Any, paginate_result: bool, per_page: int = 1, size: int = 10) -> Any:
     """
     Get all items from the database
     Args:

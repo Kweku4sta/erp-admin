@@ -3,13 +3,19 @@ import requests
 from requests import Response
 import base64
 
+from passlib.context import CryptContext
+
+
 from fastapi import UploadFile
 
 from errors.exception import InternalProcessingError
 from tools.log import Log
 
-common_logger = Log(name=f"{__name__}")
 
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+common_logger = Log(name=f"{__name__}")
 
 HEADERS = {
     "Authorization": "Basic c2VydmljZV9rZXk6c2VjcmV0",
@@ -75,3 +81,10 @@ def nia_verification(ghana_card: UploadFile, ghancard_pin:str) -> dict:
         raise InternalProcessingError(
             msg={"message": "Internal Server Error"}, code=500
         )
+    
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+

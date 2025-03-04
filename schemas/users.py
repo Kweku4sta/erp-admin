@@ -35,5 +35,11 @@ class UserOut(BaseModel):
     flag: bool
     created_at: datetime
     updated_at: datetime
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] =Field(None, description="Full name of the user", examples=["John Doe"])
+    password: Optional[str] = Field(None, description="Password of the user", min_length=8)
+
+
     
     
