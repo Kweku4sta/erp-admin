@@ -34,7 +34,7 @@ def validation_for_all_exceptions(
     request: fastapi.Request, exec: ValueError
 ) -> fastapi.responses.JSONResponse:
     """Custom validation for all exceptions"""
-    exception_logger.error(f"{validation_for_all_exceptions.__name__} - {exec.args[0]}")
+    exception_logger.error(f"{validation_for_all_exceptions.__name__} - {exec.args}")
     return fastapi.responses.JSONResponse(
         status_code=400, content={"message": exec.args[0]}
     )

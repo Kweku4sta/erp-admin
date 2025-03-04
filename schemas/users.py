@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 from fastapi import UploadFile, File
@@ -23,3 +24,16 @@ class UserIn(BaseModel):
     password: str = Field(..., description="Password of the user", min_length=8)
     company_id: int = Field(..., description="Company ID of the user")
     is_authorizer: bool = Field(..., description="Is the user an authorizer", examples=[False, True])
+
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    full_name: str
+    # company_id: int
+    is_authorizer: bool
+    flag: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    

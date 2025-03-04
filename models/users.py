@@ -33,7 +33,7 @@ class User(CustomBase):
       "id": self.id,
       "email": self.email,
       "full_name": self.full_name,
-      "company": self.company.json_data() if self.company else None,
+      "company": self.company.name if self.company else None,
       "flag": self.flag,
       "is_authorizer": self.is_authorizer,
       "created_at": self.created_at,

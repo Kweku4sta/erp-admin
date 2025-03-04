@@ -6,7 +6,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 
 
-from api.v1.router import health, sample_route, users, companies, kyc_accounts, documents
+from api.v1.router import health,users, companies, kyc_accounts, documents
 from config.setting import Settings
 from core import setup as db_setup
 from errors.exception import AuthException, InternalProcessingError
@@ -28,12 +28,6 @@ class AppBuilder:
             health.health_router,
             prefix=settings.API_PREFIX,
             tags=["API Health"],
-        )
-    # register the sample route
-        self._app.include_router(
-            sample_route.sample_router,
-            prefix=settings.API_PREFIX,
-            tags=["Sample Route"],
         )
         self._app.include_router(
             users.users_router,

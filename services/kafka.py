@@ -16,11 +16,11 @@ class KafkaCustomProducer:
         producer = KafkaProducer(
                                 bootstrap_servers=bootstrap_servers,
                                 security_protocol="SASL_PLAINTEXT",
-                                sasl_mechanism="SCARM-SHA-256",
+                                sasl_mechanism="SCRAM-SHA-256",
                                 sasl_plain_username=settings.KAFKA_USERNAME,
                                 sasl_plain_password=settings.KAFKA_PASSWORD,
                                 value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-                                reties=3,
+                                retries=3,
                                 retry_backoff_ms=1000,
                                 acks=1
                                 )
@@ -40,7 +40,7 @@ class KafkaCustomConsumer:
                                 settings.KAFKA_TOPIC,
                                 bootstrap_servers=bootstrap_servers,
                                 security_protocol="SASL_PLAINTEXT",
-                                sasl_mechanism="SCARM-SHA-256",
+                                sasl_mechanism="SCRAM-SHA-256",
                                 sasl_plain_username=settings.KAFKA_USERNAME,
                                 sasl_plain_password=settings.KAFKA_PASSWORD,
                                 value_deserializer=lambda v: json.loads(v.decode('utf-8')),

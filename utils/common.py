@@ -59,14 +59,13 @@ def send_request(method: str, url: str, data: dict[Any, Any]= None) -> requests.
     
 
 
-def nia_verification(ghana_card: UploadFile) -> dict:
+def nia_verification(ghana_card: UploadFile, ghancard_pin:str) -> dict:
     """
     Verify NIA
     """
     try:
         image = ghana_card.file.read()
-        ghana_card = base64.b64encode(image).decode("utf-8")
-        data = {"image": ghana_card}
+        data = {"image": image}
         url = "https://nia-verification.com"
         method = "POST"
         response = send_request(method, url, data)

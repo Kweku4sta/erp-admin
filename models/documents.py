@@ -6,7 +6,7 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-from models.custom_base import CustomBase
+from models.custom_base import CustomBase,BaseWithCreator
 
 
 class Status(Enum):
@@ -17,7 +17,7 @@ class Status(Enum):
 
 
 
-class Document(CustomBase):
+class Document(CustomBase,BaseWithCreator ):
     __tablename__ = 'documents'
 
     company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
@@ -25,7 +25,8 @@ class Document(CustomBase):
     verifier_id: Mapped[int | None] = mapped_column(ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
     document_type: Mapped[str] = mapped_column(String(100), nullable=False)
     document_url: Mapped[str] = mapped_column(String, nullable=False)
-    status: Mapped[Status] = mapped_column(String(50), default=Status.new)
+    s3_key: Mapped[str] = mapped_column(String, nullable=True)
+    status: Mapped[Status] = mapped_column(String(50), default="new")
     verified_at: Mapped[datetime | None] = mapped_column(DateTime)
     
     # Relationships
@@ -46,7 +47,19 @@ class Document(CustomBase):
             "id": self.id,
             "document_type": self.document_type,
             "document_url": self.document_url,
-            "status": self.status.value,
+            "s3_key": self.s3_key,
+            "status": self.status,
             "verified_by": self.verifier.json_data() if self.verifier else None,
-            "verified_at": self.verified_at
+            "verified_at": self.verified_at,
+            "created_by": {
+                "id": self.created_by.id,
+                "email": self.created_by.email,
+                "full_name": self.created_by.full_name,
+                # "company": self.created_by.company.name if self.created_by.company else None,
+                "company": {
+                            "name": self.created_by.company.name if self.created_by else None,
+                            "id": self.created_by.company.id if self.created_by else None
+                },
+                "company_id": self.created_by.company_id
+            },
         }

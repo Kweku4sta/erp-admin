@@ -28,7 +28,7 @@ class KafkaStreamProducer:
     
 
     @classmethod
-    @retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
+    @retry(stop=stop_after_attempt(5))
     def send_json_data_to_topic(cls, topic: str, data: dict, request_details: Request = None)-> None:
         try:
             producer = cls.__connect_to_kafka()
@@ -37,7 +37,7 @@ class KafkaStreamProducer:
         # except kafka errors 
         except Exception as e:
             _loggers.error(f"{cls.send_json_data_to_topic.__name__} - {str(e.args[0])}")
-            raise Exception("Unable to connect to Kafka")
+            raise Exception("Unable to connect to Kafka") from e
         finally:
             producer.close()
 
