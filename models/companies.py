@@ -47,6 +47,9 @@ class Company(CustomBase, BaseWithCreator):
     documents: Mapped[List['Document']] = relationship(back_populates='company')
     users: Mapped[List['User']] = relationship("User", back_populates="company", foreign_keys="[User.company_id]", passive_deletes="all")
 
+    transactions: Mapped[List['Transaction']] = relationship("Transaction", back_populates="company", passive_deletes="all")
+    payments: Mapped[List['Payment']] = relationship("Payment", back_populates="company", passive_deletes="all")	
+
 
     def json_data(self):
         print(self.created_by)

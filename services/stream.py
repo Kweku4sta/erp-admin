@@ -1,10 +1,12 @@
 import json
 import hashlib
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 from fastapi import Request
 from kafka import KafkaProducer, KafkaConsumer, errors
+from controller.transactions import TransactionsController
 
 
 from tools.log import Log
@@ -31,15 +33,15 @@ class KafkaStreamProducer:
     @retry(stop=stop_after_attempt(5))
     def send_json_data_to_topic(cls, topic: str, data: dict, request_details: Request = None)-> None:
         try:
+            print("Sending data to kafka")
             producer = cls.__connect_to_kafka()
             producer.send(topic, value=data).add_callback(on_stream_stream).add_errback(on_stream_error)
             producer.flush()
         # except kafka errors 
         except Exception as e:
-            _loggers.error(f"{cls.send_json_data_to_topic.__name__} - {str(e.args[0])}")
+            _loggers.error(f"{cls.send_json_data_to_topic.__name__} - {str(e)}")
             raise Exception("Unable to connect to Kafka") from e
-        finally:
-            producer.close()
+        
 
 
     @classmethod
@@ -51,11 +53,17 @@ class KafkaStreamProducer:
         cls.send_json_data_to_topic("audit_logs", log_entry)
 
 
+   
+
 
 class KafkaStreamConsumer:
+     
+    executor = ThreadPoolExecutor(max_workers=10)
+
+
     @classmethod
-    def __connect_to_kafka(cls)->KafkaConsumer:
-        return KafkaCustomConsumer.connect_kafka()
+    def __connect_to_kafka(cls, topic: str, auto_offset="earlist")->KafkaConsumer:
+        return KafkaCustomConsumer.connect_kafka(topic,auto_offset)
     
 
     @classmethod
@@ -70,6 +78,34 @@ class KafkaStreamConsumer:
             raise Exception("Unable to connect to Kafka, make sure the topic exists")
         finally:
             consumer.close()
+
+
+    @classmethod
+    def save_transactions_data(cls):
+        try:
+            consumer = cls.__connect_to_kafka(topic="transactions")
+            "Let start saving data into the transactions from the backend server"
+            for message in consumer:
+                TransactionsController.save_transaction(message)
+        except Exception as e:
+            _loggers.error(f"{cls.save_transactions_data.__name__} - {str(e.args[0])}")
+            raise ValueError("Unable to connect to Kafka") from e
+        finally:
+            consumer.close()
+
+
+    @classmethod
+    def save_stream_data_to_tables(cls):
+        """Save stream data to tables
+        This method saves stream data to tables
+
+        
+        """
+        cls.executor.submit(cls.save_transactions_data)
+
+
+        
+
 
 
 

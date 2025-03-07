@@ -1,15 +1,16 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 from sqlalchemy import String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from models.documents import Document
+from models.transactions import Transaction
 
 
-from models.custom_base import CustomBase
+from models.custom_base import CustomBase, BaseWithCreator
 
 
-class User(CustomBase):
+class User(CustomBase, BaseWithCreator):
   
   __tablename__="users"
 
@@ -23,6 +24,10 @@ class User(CustomBase):
   # role_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"))
   # role = relationship("Role", back_populates="users", passive_deletes="all")
   flag: Mapped[bool] = mapped_column(Boolean, default=False)
+
+  transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="user", foreign_keys="[Transaction.created_by]", passive_deletes="all")
+  payments: Mapped[List["Payment"]] = relationship("Payment", back_populates="user", foreign_keys="[Payment.user_id]", passive_deletes="all")
+
 
   # --------------------------relationship---------------------
   documents: Mapped['Document'] = relationship("Document",back_populates='user', foreign_keys="[Document.user_id]", passive_deletes="all")

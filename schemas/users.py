@@ -24,6 +24,7 @@ class UserIn(BaseModel):
     password: str = Field(..., description="Password of the user", min_length=8)
     company_id: int = Field(..., description="Company ID of the user")
     is_authorizer: bool = Field(..., description="Is the user an authorizer", examples=[False, True])
+    created_by_id: int = Field(..., description="ID of the admin creating the user", examples=[1, 2])
 
 
 class UserOut(BaseModel):

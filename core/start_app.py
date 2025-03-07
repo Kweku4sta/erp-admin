@@ -6,7 +6,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 
 
-from api.v1.router import health,users, companies, kyc_accounts, documents
+from api.v1.router import health,users, companies, kyc_accounts, documents, payments
 from config.setting import Settings
 from core import setup as db_setup
 from errors.exception import AuthException, InternalProcessingError
@@ -48,6 +48,12 @@ class AppBuilder:
             documents.documents_router,
             prefix=settings.API_PREFIX,
             tags=["User/Company Documents"],
+        )
+
+        self._app.include_router(
+            payments.payment_router,
+            prefix=settings.API_PREFIX,
+            tags=["Payments"],
         )
         
         @self._app.get("/", include_in_schema=False)

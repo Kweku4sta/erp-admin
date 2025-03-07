@@ -25,7 +25,7 @@ class KafkaCustomProducer:
                                 acks=1
                                 )
         if not producer.bootstrap_connected():
-            Log.error(f"{KafkaProducer.connect_kafka.__name__} - Unable to connect to Kafka")
+            Log.error(f"{KafkaCustomProducer.connect_kafka.__name__} - Unable to connect to Kafka")
             raise Exception("Unable to connect to Kafka")
         return producer
     
@@ -34,20 +34,20 @@ class KafkaCustomProducer:
 
 class KafkaCustomConsumer:
     @staticmethod
-    def connect_kafka()-> KafkaConsumer:
+    def connect_kafka(topic: str, auto_offset='earliest')-> KafkaConsumer:
         bootstrap_servers = settings.KAFKA_BOOTSTRAP_SERVERS.split(',')
         consumer = KafkaConsumer(
-                                settings.KAFKA_TOPIC,
+                                topic,
                                 bootstrap_servers=bootstrap_servers,
                                 security_protocol="SASL_PLAINTEXT",
                                 sasl_mechanism="SCRAM-SHA-256",
                                 sasl_plain_username=settings.KAFKA_USERNAME,
                                 sasl_plain_password=settings.KAFKA_PASSWORD,
                                 value_deserializer=lambda v: json.loads(v.decode('utf-8')),
-                                auto_offset_reset='auto_offset',
+                                auto_offset_reset=auto_offset,
                                 enable_auto_commit=True,
                                 )
         if not consumer.bootstrap_connected():
-            Log.error(f"{KafkaConsumer.connect_kafka.__name__} - Unable to connect to Kafka")
+            Log.error(f"{KafkaCustomConsumer.connect_kafka.__name__} - Unable to connect to Kafka")
             raise Exception("Unable to connect to Kafka, make sure the topic exists")
         return consumer
