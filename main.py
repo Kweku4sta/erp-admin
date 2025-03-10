@@ -1,8 +1,8 @@
-import debugpy
+# import debugpy
 
 
 from core.start_app import AppBuilder
-from utils.default import create_default_data
+from utils.default import create_default_system_admin
 # debugpy.listen(("127.0.0.1", 5678))
 # debugpy.wait_for_client()
 
@@ -13,4 +13,5 @@ from utils.default import create_default_data
 app = AppBuilder().get_app()
 @app.on_event("startup")
 async def startup_event():
-    create_default_data()
+    create_default_system_admin()
+    

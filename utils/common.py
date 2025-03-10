@@ -13,6 +13,7 @@ from tools.log import Log
 
 
 
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 common_logger = Log(name=f"{__name__}")
@@ -87,4 +88,7 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+
+
 

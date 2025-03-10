@@ -31,7 +31,9 @@ class CompanyController:
         This method gets a company
         """
         company = sql.get_object_by_id_from_database(Company, company_id)
-        return company.json_data()
+        if company:
+            return company.json_data()
+        raise HTTPException(status_code=404, detail="Company not found")
     
     @staticmethod
     def get_companies(params: CompanyParams) -> Page[Company]:
@@ -48,7 +50,7 @@ class CompanyController:
 
 
         """
-        companies = sql.get_all_objects_from_database(Company, True, params.page_size, params.per_page)
+        companies = sql.get_all_objects_from_database(Company, True, params.page_size, params.page)
         return companies
     
 

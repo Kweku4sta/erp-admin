@@ -32,12 +32,14 @@ class KycAccount(CustomBase, BaseWithCreator):
                 "id": self.created_by.id,
                 "email": self.created_by.email,
                 "full_name": self.created_by.full_name,
+                "role": self.created_by.role.name if self.created_by.role else None,
+                "role_id": self.created_by.role_id,
                 # "company": self.created_by.company.name,
-                "company": {
-                            "name": self.created_by.company.name if self.created_by else None,
-                            "id": self.created_by.company.id if self.created_by else None
-                },
-                "company_id": self.created_by.company_id	
+                # "company": {
+                #             "name": self.created_by.company.name if self.created_by else None,
+                #             "id": self.created_by.company.id if self.created_by else None
+                # },
+                # "company_id": self.created_by.company_id	
 
             }
         }

@@ -42,8 +42,6 @@ class Company(CustomBase, BaseWithCreator):
 
     # -------------------------------relationship-------------------------------------
     kyc_account: Mapped["KycAccount"] = relationship("KycAccount", back_populates='company')
-    # creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    # creator: Mapped["User"] = relationship("User", foreign_keys="[Company.creator_id]")
     documents: Mapped[List['Document']] = relationship(back_populates='company')
     users: Mapped[List['User']] = relationship("User", back_populates="company", foreign_keys="[User.company_id]", passive_deletes="all")
 
@@ -66,11 +64,8 @@ class Company(CustomBase, BaseWithCreator):
                 "id": self.created_by.id if self.created_by else None,
                 "email": self.created_by.email if self.created_by else None,
                 "full_name": self.created_by.full_name if self.created_by else None,
-                "company": {
-                            "name": self.created_by.company.name if self.created_by else None,
-                            "id": self.created_by.company.id if self.created_by else None
-                },
-                "company_id": self.created_by.company_id if self.created_by else None,
+                "role": self.created_by.role.name if self.created_by else None,
+                "role_id": self.created_by.role_id if self.created_by else None,
             },
             "kyc_account": self.kyc_account.json_data() if self.kyc_account else None,
             "users": [user.json_data() for user in self.users],

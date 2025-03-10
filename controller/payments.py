@@ -7,6 +7,7 @@ from fastapi import HTTPException, BackgroundTasks
 from services.stream import KafkaStreamProducer
 from services.auditlog import AuditLogger
 
+
 from utils import session
 
 
@@ -25,8 +26,8 @@ class PaymentController:
         """
         payment = Payment(**payment)
         payment =sql.add_object_to_database(payment)
-        # bg_task.add_task(KafkaStreamProducer.send_json_data_to_topic, "payments", payment.json_data())
-        PaymentController.executor.submit(AuditLogger.log_activity, 1, f"Created the payment:{payment.amount}", "CREATE")
+        bg_task.add_task(KafkaStreamProducer.send_json_data_to_topic, "payments", payment.json_data())
+        PaymentController.executor.submit(AuditLogger.log_activity, payment.created_by_id, f"Created the payment with ID:{payment.id}", "CREATE")
         # bg_task.add_task(KafkaStreamProducer.send_json_data_to_topic, "payments", payment.json_data())
         return payment.json_data()
     
@@ -37,6 +38,8 @@ class PaymentController:
 
         Args:
             payment_id (int): [description]
+
+            
 
         Returns:
             dict: [description]
@@ -67,5 +70,30 @@ class PaymentController:
                 for key, value in payment_data.items():
                     setattr(payment, key, value)
                 db_session.commit()
+                return payment.json_data()
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+
+
+    @staticmethod
+    def delete_payment(payment_id: int, created_by_id: int) -> dict:
+        """Delete Payment
+        This method deletes a payment
+
+        Args:
+            payment_id (int): [description]
+            created_by_id (int): the user deleting the payment
+
+        Returns:
+            dict: [description]
+        """
+        with session.CreateDBSession() as db_session:
+            payment = db_session.get(Payment, payment_id)
+            if payment:
+                if payment.is_reversed:
+                    raise HTTPException(status_code=400, detail="Payment is reversed")
+                db_session.delete(payment)
+                db_session.commit()
+                PaymentController.executor.submit(AuditLogger.log_activity, created_by_id, f"Deleted the payment with id:{payment.id}", "DELETE")
                 return payment.json_data()
             raise HTTPException(status_code=404, detail="Payment not found")

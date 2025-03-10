@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     KAFKA_USERNAME: str = "admin"
     KAFKA_PASSWORD: str = "admin"
     KAFKA_BOOTSTRAP_SERVERS : str ="localhost:9092,localhost:9093,localhost:9094"
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE: int = 60
+    DEFAULT_ADMIN_PASSWORD: str = "Changem!1"
+    DEFAULT_USER_PASSWORD: str = "Changem!1"
+
 
     class Config:
         env_file = ".env"

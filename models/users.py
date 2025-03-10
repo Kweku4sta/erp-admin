@@ -10,7 +10,7 @@ from models.transactions import Transaction
 from models.custom_base import CustomBase, BaseWithCreator
 
 
-class User(CustomBase, BaseWithCreator):
+class User(CustomBase, BaseWithCreator ):
   
   __tablename__="users"
 
@@ -21,8 +21,7 @@ class User(CustomBase, BaseWithCreator):
   is_authorizer: Mapped[bool] = mapped_column(Boolean, default=False)
   company_id: Mapped[int] = mapped_column(Integer, ForeignKey("companies.id"))
   company: Mapped["Company"] =relationship("Company", back_populates="users", passive_deletes="all", foreign_keys="[User.company_id]")
-  # role_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"))
-  # role = relationship("Role", back_populates="users", passive_deletes="all")
+  has_portal_access: Mapped[bool] = mapped_column(Boolean, default=False)
   flag: Mapped[bool] = mapped_column(Boolean, default=False)
 
   transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="user", foreign_keys="[Transaction.created_by]", passive_deletes="all")

@@ -15,9 +15,11 @@ class Creator (BaseModel):
     id: int
     email: str
     full_name: str
+    role: str
+    role_id: int
     # company: str
-    company_id: int
-    company: CreatorCompany
+    # company_id: int
+    # company: CreatorCompany
 
 
 class DocumentType(str, Enum):

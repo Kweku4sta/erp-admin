@@ -32,9 +32,11 @@ class Creator (BaseModel):
     id: int | None
     email: str | None
     full_name: str | None
+    role: str | None
+    role_id: int | None
     # company: str | None
-    company_id: int | None
-    company: CreatorCompany
+    # company_id: int | None
+    # company: CreatorCompany
 
 
 

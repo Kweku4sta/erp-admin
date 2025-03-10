@@ -17,7 +17,7 @@ class Status(Enum):
 
 
 
-class Document(CustomBase,BaseWithCreator ):
+class Document(CustomBase, BaseWithCreator ):
     __tablename__ = 'documents'
 
     company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
@@ -55,11 +55,13 @@ class Document(CustomBase,BaseWithCreator ):
                 "id": self.created_by.id,
                 "email": self.created_by.email,
                 "full_name": self.created_by.full_name,
-                # "company": self.created_by.company.name if self.created_by.company else None,
-                "company": {
-                            "name": self.created_by.company.name if self.created_by else None,
-                            "id": self.created_by.company.id if self.created_by else None
-                },
-                "company_id": self.created_by.company_id
+                "role": self.created_by.role.name if self.created_by.role else None,
+                "role_id": self.created_by.role_id,
+                # # "company": self.created_by.company.name if self.created_by.company else None,
+                # "company": {
+                #             "name": self.created_by.company.name if self.created_by else None,
+                #             "id": self.created_by.company.id if self.created_by else None
+                # },
+                # "company_id": self.created_by.company_id
             },
         }

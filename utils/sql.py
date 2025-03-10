@@ -5,8 +5,14 @@ from typing import Any, Union
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import joinedload
+from fastapi import HTTPException
+
 
 from utils import session
+from models.admins import Admin
+from tools.redis import Cacher
+
+redis_cache = Cacher()
 
 
 def add_object_to_database(item: Any) -> dict:
@@ -17,7 +23,7 @@ def add_object_to_database(item: Any) -> dict:
                 database operations
         item(Any): The item to insert
     returns:
-        bool
+        Any
     """
     with session.CreateDBSession() as database_session:
         database_session.add(item)
@@ -84,7 +90,7 @@ def get_object_by_id_from_database(model: Any, id: int, join_loads: Union[str] =
     def feel_free_to_create_more_functions():
         pass
 
-def hard_delete_object_from_database(model: Any, id: int) -> bool:
+def hard_delete_object_from_database(model: Any, id: int) -> Any:
         """
         Hard delete an item from the database
         Args:
@@ -93,14 +99,14 @@ def hard_delete_object_from_database(model: Any, id: int) -> bool:
             model(Any): The model to query
             id(int): The id of the item to query
         returns:
-            bool
+            Any
         """
         with session.CreateDBSession() as database_session:
             item = database_session.query(model).filter(model.id == id).first()
             if item:
                 database_session.delete(item)
                 database_session.commit()
-                return True
+                return item
             return False
         
 def update_object_in_database(model: Any, item: Any, id: int) -> Any:
@@ -140,6 +146,45 @@ def deactivate_object_in_database(model: Any, id: int) -> Any:
                 database_session.commit()
                 return item
             return False
+        
+
+
+def check_created_by_admin(created_by_id: int)-> bool:
+
+    """check user performing the CRUD operations
+
+    Args:
+        created_by_id (int): the admin performing the operation
+
+    Returns:
+        bool: True if the user is admin, raise an exception otherwise
+
+    """
+    cached_user = redis_cache.get_value(f"admin_{created_by_id}")
+    if cached_user:
+        return cached_user.get("is_admin")
+    admin = get_object_by_id_from_database(Admin, created_by_id)
+
+    if admin:
+        redis_cache.set_value(f"user_{admin.id}", admin.json_data(), 3600)
+        return True
+    raise HTTPException(status_code=403, detail="Unauthorized access")
+
+
+def check_if_instance_exist(model: Any, field: str, value: Any) -> Any:
+    """
+    Check if an instance exists in the database
+    Args:
+        model(Any): The model to query
+        field(str): The field to query
+        value(Any): The value to query
+    returns:
+        Any
+    """
+    with session.CreateDBSession() as database_session:
+        return database_session.query(model).filter(getattr(model, field) == value).first()
+
+
 
     
     

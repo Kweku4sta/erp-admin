@@ -21,7 +21,7 @@ class KycAccountController:
         """
         kyc_account = KycAccount(**kyc_account_data)
         sql.add_object_to_database(kyc_account)
-        KycAccountController.executor.submit(AuditLogger.log_activity, kyc_account_data["created_by_id"], f"Created the kyc account:{kyc_account_data['name']}", "CREATE")
+        KycAccountController.executor.submit(AuditLogger.log_activity, kyc_account_data["created_by_id"], f"Created the kyc account:{kyc_account_data['account_type']}", "CREATE")
         return kyc_account.json_data()
     
 

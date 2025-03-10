@@ -1,6 +1,9 @@
 from utils import session
 from models.users import User
+from models.admins import Admin
+from models.roles import Role
 from models.companies import Company
+from utils.common import get_password_hash
 
 
 
@@ -24,6 +27,19 @@ default_admin_for_company = {
     "password": "password",
     "is_authorizer": True,
     "flag": False
+}
+
+
+default_sytem_admin = {
+    "email": "sytemadmin@remcash.com",
+    "full_name": "System Admin",
+    "password": "password",
+
+}
+
+default_role = {
+    "name": "system_admin",
+    "description": "System Admin Role"
 }
 
 
@@ -53,4 +69,34 @@ def create_default_data():
             company = create_default_company()
             create_default_admin_for_company(company.id)
         return company
+    
+
+
+
+
+# create default role and system admin and assign to system admin
+
+def create_default_system_admin():
+    with session.CreateDBSession() as db_session:
+        system_admin = db_session.query(Admin).filter(Admin.email == default_sytem_admin["email"]).first()
+        if not system_admin:
+            role = db_session.query(Role).filter(Role.name == default_role["name"]).first()
+            if not role:
+                role = Role(**default_role)
+                db_session.add(role)
+                db_session.commit()
+                db_session.refresh(role)
+            default_sytem_admin["role_id"] = role.id
+            default_sytem_admin["password"] = get_password_hash(default_sytem_admin["password"])
+            system_admin = Admin(**default_sytem_admin)
+            db_session.add(system_admin)
+            db_session.commit()
+            db_session.refresh(system_admin)
+            return system_admin
+        return system_admin
+
+
+
+    
+
     
