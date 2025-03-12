@@ -1,5 +1,5 @@
 
-
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -31,10 +31,10 @@ class CreatorDetails(BaseModel):
 
 
 class KycAccountOut(BaseModel):
+    id: int
     account_type: str
     max_amount: float
     company_id: int
-    id: int
     created_by: CreatorDetails 
 
 
@@ -46,10 +46,27 @@ class KycAccountUpdate(BaseModel):
 
 
 class KycParams(BaseModel):
-    page_size: int = Field(10, title="Page Size", description="Number of items to return per page", examples=[10, 20])
+    size: int = Field(50, title="Page Size", description="Number of items to return per page", examples=[10, 20])
     page: int = Field(1, title="Page", description="Page number to return", examples=[1, 2])
+    created_by_id: Optional[int] = Field(None, title="Creator ID", description="ID of the admin creating the account", examples=[1, 2])
+    company_id: Optional[int] = Field(None, title="Company ID", description="ID of the company the account belongs to", examples=[1, 2])
+    account_type: Optional[str] = Field(None, title="Account Type", description="Type of the account", examples=["account_type1", "account_type2"])
+    max_amount: Optional[float] = Field(None, title="Max Amount", description="Maximum amount allowed in the account", examples=[20000.00, 30000.00])
 
 
+class MuitiCreator(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role_id: int
+
+
+class MultiKycAccount(BaseModel):
+    id: int
+    account_type: str
+    max_amount: float
+    company_id: int
+    created_by: MuitiCreator
 
 
 

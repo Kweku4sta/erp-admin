@@ -44,17 +44,25 @@ class Status(str, Enum):
     verified = 'verified'
     deactivated = 'deactivated'
 
+class VerifyBy(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: str
+    role_id: int
+
 
 
 class DocumentOut(BaseModel):
     id: int
-    # document_type: DocumentType
+    document_type: DocumentType
     status: Status
     s3_key: str
     document_url: str
     created_by: Creator
-    # company_id: int
-    # user_id: int
+    company_id: Optional[int]
+    user_id: Optional[int]
+    verified_by: Optional[VerifyBy]
 
 
 class VerifyDocument(BaseModel, use_enum_values=True):
@@ -63,3 +71,20 @@ class VerifyDocument(BaseModel, use_enum_values=True):
 
 
 
+class PresignedUrl(BaseModel):
+    presigned_url: str
+    s3_key: str
+
+
+class DocumentParams(BaseModel):
+    page: Optional[int] = Field(1, title="Page", description="Page number")
+    size: Optional[int] = Field(50, title="Page Size", description="Number of items per page")
+    company_id: Optional[int] = Field(None, title="Company ID", description="ID of the company")
+    user_id: Optional[int] = Field(None, title="User ID", description="ID of the user")
+    created_by_id: Optional[int] = Field(None, title="Creator ID", description="ID of the admin creating the document")
+    document_type: Optional[DocumentType] = Field(None, title="Document Type", description="Type of the document")
+    status: Optional[Status] = Field(None, title="Status", description="Status of the document")
+    verifier_id: Optional[int] = Field(None, title="Verifier ID", description="ID of the user verifying the document")
+
+
+    

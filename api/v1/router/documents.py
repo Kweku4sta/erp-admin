@@ -1,15 +1,16 @@
 from typing import List, Annotated, Optional
 
 from fastapi import APIRouter, Form, Depends, UploadFile, File
+from fastapi_pagination import Page
 
-from schemas.documents import  DocumentType, VerifyDocument
+from schemas.documents import  DocumentType, VerifyDocument, DocumentOut, PresignedUrl, DocumentParams
 from controller.documents import DocumentController
 
 
 
 documents_router = APIRouter()
 
-@documents_router.post("/company_documents/{company_id}")
+@documents_router.post("/company_documents/{company_id}", response_model=DocumentOut)
 async def add_company_documents(
     company_id: int,
     created_by_id: int ,
@@ -39,7 +40,7 @@ async def add_user_documents(
     document = await DocumentController.upload_user_document(created_by_id,company_user_id, ghana_card, profile_picture)
     return document
 
-@documents_router.put("/user_documents/verify/{user_id}")
+@documents_router.put("/user_documents/verify/{user_id}", response_model=DocumentOut)
 async def verify_user_document(
     user_id: int,
     data: VerifyDocument
@@ -52,12 +53,46 @@ async def verify_user_document(
 
 
 
-@documents_router.get("/company_documents")
-async def get_company_document(s3_key: str):
+@documents_router.get("/company_documents/presigned_url",response_model=PresignedUrl)
+async def get_company_document_url(s3_key: str):
     """Get Company Document
     This method gets a company document
     """
-    print("this is the s3 key",s3_key)
+    
     document = DocumentController.get_presigned_url(s3_key)
     return document
+
+
+
+
+@documents_router.get("/documents/company/{company_id}", response_model=List[DocumentOut])
+def get_company_documents(company_id: int):
+    """Get Company Documents
+    This method gets all company documents
+    """
+    documents = DocumentController.get_company_documents(company_id)
+    return documents
+
+
+@documents_router.get("/documents/user/{user_id}", response_model=List[DocumentOut])
+def get_user_documents(user_id: int):
+    """Get User Documents
+    This method gets all user documents
+    """
+    documents = DocumentController.get_user_documents(user_id)
+    return documents
+
+
+
+
+
+
+
+
+
+
+@documents_router.get("/documents", response_model=Page[DocumentOut])
+def get_all_documents(params: DocumentParams = Depends()):
+    documents = DocumentController.get_all_documents(params)
+    return documents
 

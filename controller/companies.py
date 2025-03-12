@@ -8,7 +8,9 @@ from schemas.companies import CompanyIn, CompanyUpdate, CompanyParams
 from utils import sql
 from models.companies import Company
 from services.auditlog import AuditLogger
-from utils import session
+from utils import session, filter
+from services.stream import KafkaStreamProducer
+
 
 class CompanyController:
     executor = ThreadPoolExecutor(max_workers=10)
@@ -19,9 +21,10 @@ class CompanyController:
         This method creates a company
         """
         company = Company(**company_data)
-        sql.add_object_to_database(company)
+        db_company = sql.add_object_to_database(company)
+        CompanyController.executor.submit(KafkaStreamProducer.send_json_data_to_topic, "remcashtransactcompany", db_company.json_kafka())
         CompanyController.executor.submit(AuditLogger.log_activity, company_data["created_by_id"], f"Created the company:{company_data['name']}", "CREATE")
-        return company.json_data()
+        return db_company.json_data()
     
 
 
@@ -50,8 +53,10 @@ class CompanyController:
 
 
         """
-        companies = sql.get_all_objects_from_database(Company, True, params.page_size, params.page)
-        return companies
+        with session.CreateDBSession() as db_session:
+            companies_query = filter.DynamicQuery(db_session,params, Company)
+            companies_query.add_joined_loads()
+            return companies_query.paginate()
     
 
     @staticmethod
@@ -59,19 +64,15 @@ class CompanyController:
         """Update Company
         This method updates a company
         """
-        with session.CreateDBSession() as db_session:
-            company = db_session.query(Company).filter(Company.id == company_id).first()
-            if company:
-                user_updating = company_data["created_by_id"]
-                company_data.pop("created_by_id")
-                for key, value in company_data.items():
-                    setattr(company, key, value) 
-                db_session.commit()
-                db_session.refresh(company)
-                CompanyController.executor.submit(AuditLogger.log_activity, user_updating, f"Updated the company:{company_data['name']}", "UPDATE")
-                return company.json_data()
-            raise HTTPException(status_code=404, detail="Company not found")
-        
+        user_updating = company_data["created_by_id"]
+        company_data.pop("created_by_id")
+        company_data = {k: v for k, v in company_data.items() if v is not None}
+        company = sql.update_object_in_database(Company, company_data, company_id)
+        if company:
+            CompanyController.executor.submit(AuditLogger.log_activity, user_updating, f"Updated the company:{company_data['name']}", "UPDATE")
+            return company.json_data()
+        raise HTTPException(status_code=404, detail="Company not found")
+
 
     @staticmethod
     def delete_company(company_id: int, created_by_id: int) -> Dict[str, any]:

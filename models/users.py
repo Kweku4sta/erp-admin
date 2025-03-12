@@ -1,5 +1,6 @@
 from typing import Optional, List
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import mapped_column, relationship, Mapped
@@ -10,9 +11,23 @@ from models.transactions import Transaction
 from models.custom_base import CustomBase, BaseWithCreator
 
 
+class Title(str, Enum):
+  mr = "Mr"
+  mrs = "Mrs"
+  miss = "Miss"
+  dr = "Dr"
+  prof = "Prof"
+  sir = "Sir"
+  lady = "Lady"
+  lord = "Lord"
+  rev = "Rev"
+
+
 class User(CustomBase, BaseWithCreator ):
   
   __tablename__="users"
+  
+
 
   email: Mapped[str] = mapped_column(String, unique=True)
   full_name: Mapped[str] = mapped_column(String, nullable=False)
@@ -21,8 +36,13 @@ class User(CustomBase, BaseWithCreator ):
   is_authorizer: Mapped[bool] = mapped_column(Boolean, default=False)
   company_id: Mapped[int] = mapped_column(Integer, ForeignKey("companies.id"))
   company: Mapped["Company"] =relationship("Company", back_populates="users", passive_deletes="all", foreign_keys="[User.company_id]")
-  has_portal_access: Mapped[bool] = mapped_column(Boolean, default=False)
+  is_transact_portal_user: Mapped[bool] = mapped_column(Boolean, default=False)
   flag: Mapped[bool] = mapped_column(Boolean, default=False)
+  title: Mapped[Optional[Title]] = mapped_column(String, nullable=True)
+  job_position: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+  nia_verification_status: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
 
   transactions: Mapped[List["Transaction"]] = relationship("Transaction", back_populates="user", foreign_keys="[Transaction.created_by]", passive_deletes="all")
   payments: Mapped[List["Payment"]] = relationship("Payment", back_populates="user", foreign_keys="[Payment.user_id]", passive_deletes="all")
@@ -36,14 +56,40 @@ class User(CustomBase, BaseWithCreator ):
     return {
       "id": self.id,
       "email": self.email,
+      'active': self.active,
       "full_name": self.full_name,
+      "company_id": self.company_id,
+      "is_transact_portal_user": self.is_transact_portal_user if self.is_transact_portal_user else None,
       "company": self.company.name if self.company else None,
+      "title": self.title if self.title else None,
+      "job_position": self.job_position if self.job_position else None, 
       "flag": self.flag,
       "is_authorizer": self.is_authorizer,
       "created_at": self.created_at,
       "updated_at": self.updated_at,
       "documents": [document.json_data() for document in self.documents] if self.documents else None,
-      "token": self.token
+      "token": self.token,
+      "created_by": {
+        "id": self.created_by.id,
+        "email": self.created_by.email,
+        "full_name": self.created_by.full_name,
+        "role": self.created_by.role.name,
+        "role_id": self.created_by.role_id,
+        "created_at": self.created_by.created_at,
+      }
+    }
+
+
+  def json_kafka(self):
+    return {
+      "id": self.id,
+      "email": self.email,
+      "full_name": self.full_name,
+      "flag": self.flag,
+      "is_authorizer": self.is_authorizer,
+      "company_id": self.company_id,
+      "active": self.active,
+      "password": self.password
     }
 
 

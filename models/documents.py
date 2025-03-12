@@ -22,7 +22,7 @@ class Document(CustomBase, BaseWithCreator ):
 
     company_id: Mapped[int | None] = mapped_column(ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
     user_id: Mapped[int | None] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
-    verifier_id: Mapped[int | None] = mapped_column(ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    verifier_id: Mapped[int | None] = mapped_column(ForeignKey('admins.id', ondelete='SET NULL'), nullable=True)
     document_type: Mapped[str] = mapped_column(String(100), nullable=False)
     document_url: Mapped[str] = mapped_column(String, nullable=False)
     s3_key: Mapped[str] = mapped_column(String, nullable=True)
@@ -32,7 +32,7 @@ class Document(CustomBase, BaseWithCreator ):
     # Relationships
     company: Mapped['Company'] = relationship(back_populates='documents')
     user: Mapped['User'] = relationship(back_populates='documents', foreign_keys=[user_id])
-    verifier: Mapped['User'] = relationship(foreign_keys=[verifier_id])
+    verifier: Mapped['Admin'] = relationship(foreign_keys=[verifier_id])
 
     # Check constraint (ensure document is linked to either a company or a user)
     __table_args__ = (
@@ -49,7 +49,15 @@ class Document(CustomBase, BaseWithCreator ):
             "document_url": self.document_url,
             "s3_key": self.s3_key,
             "status": self.status,
-            "verified_by": self.verifier.json_data() if self.verifier else None,
+            "company_id": self.company_id if self.company_id else None,
+            "user_id": self.user_id if self.user_id else None,
+            "verifier":{
+                "id": self.verifier.id if self.verifier else None,
+                "email": self.verifier.email if self.verifier else None,
+                "full_name": self.verifier.full_name if self.verifier else None,
+                "role": self.verifier.role.name if self.verifier else None,
+                "role_id": self.verifier.role_id if self.verifier else None
+            },
             "verified_at": self.verified_at,
             "created_by": {
                 "id": self.created_by.id,

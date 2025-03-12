@@ -1,9 +1,9 @@
 from typing import List 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi_pagination import Page
 
-from schemas.users import UserIn, UserOut, UserUpdate
+from schemas.users import UserIn, UserOut, UserUpdate, UsersParams, MultiUserOut
 from controller.users import UserController
 from schemas.common import DelResponse
 
@@ -31,12 +31,12 @@ def get_user(user_id: int):
     return user
 
 
-@users_router.get("/users", response_model=Page[UserOut])
-def get_users() -> List[dict]:
+@users_router.get("/users", response_model=Page[MultiUserOut])
+def get_users(users_params: UsersParams = Depends()):
     """Get Users
     This method gets all users
     """
-    users = UserController.get_users()
+    users = UserController.get_users(users_params)
     return users
 
 
@@ -55,6 +55,9 @@ def delete_user(user_id: int, created_by_id: int):
     """
     user = UserController.delete_user(user_id, created_by_id)
     return user
+
+
+
 
 @users_router.delete("/users/deactivate/{user_id}", response_model=DelResponse)
 def deactivate_user(user_id: int, created_by_id: int):

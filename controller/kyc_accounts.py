@@ -8,6 +8,8 @@ from utils import sql
 from models.kyc_accounts import KycAccount
 from utils import session
 from services.auditlog import AuditLogger
+from utils.filter import DynamicQuery
+from fastapi_pagination import Page
 
 
 class KycAccountController:
@@ -20,7 +22,7 @@ class KycAccountController:
         This method creates a kyc account
         """
         kyc_account = KycAccount(**kyc_account_data)
-        sql.add_object_to_database(kyc_account)
+        kyc_account = sql.add_object_to_database(kyc_account)
         KycAccountController.executor.submit(AuditLogger.log_activity, kyc_account_data["created_by_id"], f"Created the kyc account:{kyc_account_data['account_type']}", "CREATE")
         return kyc_account.json_data()
     
@@ -37,12 +39,15 @@ class KycAccountController:
     
 
     @staticmethod
-    def get_kyc_accounts(params: KycParams) -> Dict[str, any]:
+    def get_kyc_accounts(params: KycParams) -> Page[KycAccount]:
         """Get Kyc Accounts
         This method gets all kyc accounts
         """
-        kyc_accounts = sql.get_all_objects_from_database(KycAccount, True, params.page_size, params.page)
-        return kyc_accounts
+        with session.CreateDBSession() as db_session:
+            kyc_accounts_query = DynamicQuery(db_session, params, KycAccount)
+            kyc_accounts_query.add_joined_loads()
+            kyc_accounts = kyc_accounts_query.paginate()
+            return kyc_accounts
 
     
     @staticmethod
@@ -71,12 +76,13 @@ class KycAccountController:
         """Update Kyc Account
         This method updates a kyc account
         """
-        with session.CreateDBSession() as db_session:
-            kyc_account = db_session.query(KycAccount).filter(KycAccount.id == kyc_account_id).first()
-            if kyc_account:
-                for key, value in kyc_account_data.items():
-                    setattr(kyc_account, key, value)
-                db_session.commit()
-                KycAccountController.executor.submit(AuditLogger.log_activity, kyc_account_data["created_by_id"], f"Updated the kyc account:{kyc_account_id}", "UPDATE")
-                return kyc_account.json_data()
-            raise HTTPException(status_code=404, detail="Kyc Account not found")
+        created_by_id = kyc_account_data["created_by_id"]
+        kyc_account_data.pop("created_by_id")
+        kyc_account_data = {k: v for k, v in kyc_account_data.items() if v is not None}
+        kyc_account = sql.update_object_in_database(KycAccount, kyc_account_data, kyc_account_id)
+        if kyc_account:
+            KycAccountController.executor.submit(AuditLogger.log_activity, created_by_id, f"Updated the kyc account:{kyc_account.id} for {kyc_account.company.name}", "UPDATE")
+            return kyc_account.json_data()
+        raise HTTPException(status_code=404, detail="Kyc Account not found")
+
+        

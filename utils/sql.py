@@ -125,6 +125,7 @@ def update_object_in_database(model: Any, item: Any, id: int) -> Any:
                 for key, value in item.items():
                     setattr(db_item, key, value)
                 database_session.commit()
+                database_session.refresh(db_item)
                 return db_item
             return False
         

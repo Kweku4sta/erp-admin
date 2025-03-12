@@ -4,7 +4,7 @@ from fastapi_pagination import Page
 from fastapi import Depends
 
 from fastapi import APIRouter
-from schemas.kyc_accounts import KycAccountIn, KycAccountUpdate, KycAccountOut, KycParams
+from schemas.kyc_accounts import KycAccountIn, KycAccountUpdate, KycAccountOut, KycParams, MultiKycAccount
 from controller.kyc_accounts import KycAccountController
 from schemas.common import DelResponse
 
@@ -50,7 +50,7 @@ def update_kyc_account(kyc_account_id: int, data: KycAccountUpdate):
     return kyc_account
 
 
-@company_router.get("/kyc_accounts", response_model=Page[KycAccountOut])
+@company_router.get("/kyc_accounts", response_model=Page[MultiKycAccount])
 def get_kyc_accounts(params: KycParams = Depends()):
     """Get Kyc Accounts
     This method gets all kyc accounts

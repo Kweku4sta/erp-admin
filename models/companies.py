@@ -38,6 +38,8 @@ class Company(CustomBase, BaseWithCreator):
     email: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     ghana_card_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     nia_verification: Mapped[bool] = mapped_column(default=False)
+    transactional_currency: Mapped[str] = mapped_column(String(3), nullable=False, default="GHS")
+    website: Mapped[str | None] = mapped_column(String(255), nullable=True)
     
 
     # -------------------------------relationship-------------------------------------
@@ -57,6 +59,8 @@ class Company(CustomBase, BaseWithCreator):
             "description": self.description,
             "address": self.address,
             "phone_number": self.phone_number,
+            "website": self.website if self.website else None,
+            "transactional_currency": self.transactional_currency if self.transactional_currency else None,
             "nia_verification": self.nia_verification,
             "active": self.active,
             "email": self.email,
@@ -70,6 +74,13 @@ class Company(CustomBase, BaseWithCreator):
             "kyc_account": self.kyc_account.json_data() if self.kyc_account else None,
             "users": [user.json_data() for user in self.users],
             "documents": [document.json_data() for document in self.documents] if self.documents else None,
+        }
+    
+
+    def json_kafka(self):
+        return {
+            "id": self.id,
+            "name": self.name,
         }
     
 

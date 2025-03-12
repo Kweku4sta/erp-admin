@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi_pagination import Page
 
-from schemas.companies import CompanyIn, CompanyOut, SingleCompanyOut, CompanyParams
+from schemas.companies import CompanyIn, CompanyOut, SingleCompanyOut, CompanyParams,MultiCompanyOut, CompanyUpdate
 from controller.companies import CompanyController
 from schemas.common import DelResponse
 
@@ -30,7 +30,7 @@ def get_company(company_id: int):
     company = CompanyController.get_company(company_id)
     return company
 
-@company_router.get("/companies", response_model=Page[CompanyOut])
+@company_router.get("/companies", response_model=Page[MultiCompanyOut])
 def get_companies(params: CompanyParams = Depends()):
     """Get Companies
     This method gets all companies
@@ -40,7 +40,7 @@ def get_companies(params: CompanyParams = Depends()):
 
 
 @company_router.put("/companies/{company_id}", response_model=SingleCompanyOut)
-def update_company(company_id: int, data: CompanyIn):
+def update_company(company_id: int, data: CompanyUpdate):
     """Update Company
     This method updates a company
     """

@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     X_SUBSCRIPTION_KEY: str=  "tester"
     AUTH_SERVICE_API_USER: str = "tester"
     AUTH_SERVICE_API_KEY: str = "tester"
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: Union[int, str] = 6379
+    REDIS_HOST: str = "192.168.124.168"
+    REDIS_PORT: Union[int, str] = 6370
     REDIS_DB: Union[int, str] = 0
     REDIS_PASSWORD: str = ""
     POSTRES_DATABASE_URL: str = "postgresql://postgres:database@localhost/erp-portal"
